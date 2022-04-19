@@ -1,6 +1,5 @@
 package fr.nacvs.ied_web_scrapper.writer;
 
-import java.io.IOException;
 import java.io.Writer;
 
 import fr.nacvs.ied_web_scrapper.scrapper.Film;
