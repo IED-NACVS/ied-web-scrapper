@@ -27,7 +27,7 @@ public class Scrapper {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(Scrapper.class);
 
-	private static final String BASE_URL = "https://www.the-numbers.com/market/";
+	private static final String BASE_URL = "https://www.the-numbers.com";
 	private static final List<String> GENRES = List.of("Adventure", "Comedy", "Drama", "Action", "Thriller-or-Suspense", "Romantic-Comedy");
 	private static final List<Integer> YEARS = IntStream.range(2010, 2016).boxed().collect(Collectors.toList());
 
@@ -50,7 +50,9 @@ public class Scrapper {
 	}
 
 	public void scrapWebstite() {
+		LOGGER.info("Start of scrapping");
 		GENRES.forEach(this::scrapForGenre);
+		LOGGER.info("End of scrapping");
 	}
 
 	private void scrapForGenre(String genre) {
@@ -71,7 +73,7 @@ public class Scrapper {
 	}
 
 	private Function<Integer, String> createUrl(String genre) {
-		return y -> BASE_URL + y + "/genre/" + genre;
+		return y -> BASE_URL + "/market/" + y + "/genre/" + genre;
 	}
 
 	private Stream<Film> scrapFilms(String url) {
@@ -91,8 +93,25 @@ public class Scrapper {
 		String distributorStr = distributorElt.text();
 		String titleStr = titleElt.text();
 		// Sometimes, title is cropped in this page
-		// TODO
+		if (titleStr.endsWith("...") || titleStr.endsWith("…")) {
+			titleStr = findFullFilmTitle(titleElt);
+		}
 		return new Film(titleStr, DateUtils.formatFromUsDate(dateStr), distributorStr);
+	}
+
+	private String findFullFilmTitle(Element titleElt) {
+		String titleStr;
+		Elements linkNode = titleElt.getElementsByTag("a");
+		String filmUrl = BASE_URL + linkNode.attr("href");
+		LOGGER.info("Go to {} to have entire film title", filmUrl);
+		Document filmDocument = parseWebpage(filmUrl);
+		// Something like "Immortals (2011)"
+		String titleEntireName = filmDocument.getElementsByTag("h1")
+				.get(0)
+				.text();
+		// We want to remove the " (2011)"
+		titleStr = titleEntireName.substring(0, titleEntireName.length() - 7);
+		return titleStr;
 	}
 
 	private Document parseWebpage(String url) {
