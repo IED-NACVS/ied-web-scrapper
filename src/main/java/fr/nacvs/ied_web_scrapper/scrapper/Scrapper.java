@@ -29,7 +29,7 @@ public class Scrapper {
 
 	private static final String BASE_URL = "https://www.the-numbers.com";
 	private static final List<String> GENRES = List.of("Adventure", "Comedy", "Drama", "Action", "Thriller-or-Suspense", "Romantic-Comedy");
-	private static final List<Integer> YEARS = IntStream.range(2010, 2016).boxed().collect(Collectors.toList());
+	private static final List<Integer> YEARS = IntStream.range(2000, 2016).boxed().collect(Collectors.toList());
 
 	private OutputWriter outputWriter;
 	private Connection connection;
@@ -96,7 +96,7 @@ public class Scrapper {
 		if (titleStr.endsWith("...") || titleStr.endsWith("…")) {
 			titleStr = findFullFilmTitle(titleElt);
 		}
-		return new Film(titleStr, DateUtils.formatFromUsDate(dateStr), distributorStr);
+		return new Film(titleStr.replace("’", "'"), DateUtils.formatFromUsDate(dateStr), distributorStr);
 	}
 
 	private String findFullFilmTitle(Element titleElt) {
